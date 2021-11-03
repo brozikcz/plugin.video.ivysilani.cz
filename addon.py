@@ -185,6 +185,10 @@ try:
             li.setArt({'thumb': image})
         li.setArt({'icon': icon})
         li.setInfo("video", liVideo)
+
+        if not isFolder:
+            li.setProperty('IsPlayable', 'true')
+
         if not fanart:
             fanart = _fanart()
         li.setProperty('fanart_image', fanart)
@@ -218,7 +222,7 @@ try:
                 active = (item.active == '1')
             if active:
                 addDirectoryItem(title, url, ID=item.ID, related=True, episodes=episodes, plot=plot, date=date,
-                                 image=item.imageURL)
+                                 image=item.imageURL, isFolder=False)
         xbmcplugin.endOfDirectory(_handle_, updateListing=False, cacheToDisc=False)
 
 
@@ -291,30 +295,38 @@ try:
         finally:
             res.close()
 
-        li = xbmcgui.ListItem(title, path=url)
+        li = xbmcgui.ListItem(path=url, offscreen=True)
         li.setArt({'thumb': image})
         if "mpd" in url and "dwv" in url:
             PROTOCOL = 'mpd'
             DRM = 'com.widevine.alpha'
             MIME_TYPE = 'application/xml+dash'
             LICENSE_URL = 'https://ivys-wvproxy.o2tv.cz/license?access_token=c3RlcGFuLWEtb25kcmEtanNvdS1wcm9zdGUtbmVqbGVwc2k='
-            INPUT_STREAM = 'inputstream.adaptive'
             is_helper = inputstreamhelper.Helper(PROTOCOL, drm=DRM)
             if is_helper.check_inputstream():
                 li.setContentLookup(False)
                 li.setMimeType(MIME_TYPE)
-                li.setProperty('inputstream', INPUT_STREAM)
+                li.setProperty('inputstream', 'inputstream.adaptive')
                 li.setProperty('inputstream.adaptive.manifest_type', PROTOCOL)
                 li.setProperty('inputstream.adaptive.license_type', DRM)
                 li.setProperty('inputstream.adaptive.license_key', LICENSE_URL + '||R{SSM}|')
-                xbmcplugin.setResolvedUrl(int(sys.argv[1]), False, listitem=li)
+                # li.setProperty(key='inputstream.adaptive.pre_init_data', value='AAAAOXBzc2gAAAAA7e+LqXnWSs6jyCfc1R0h7QAAABkiETYxOTI0NDk0ODc3OTUyMjYwSOPclZsG')
+        
+        xbmcplugin.setResolvedUrl(_handle_, True, li)
 
-        player = xbmc.Player()
-        player.play(url, li)
-        if subtitles:
-            while not player.isPlaying():
-                xbmc.sleep(2000)
-            player.setSubtitles(_subtitles_path_)
+        # player = xbmc.Player()
+
+        # # print(player.isPlaying())
+        # # xbmc.sleep(1000);
+        # # if not player.isPlaying():
+        # #     xbmc.log('Trying default player...')
+        # #     player.play(item=url, listitem=li);
+
+        # player.play(url, li)
+        # if subtitles:
+        #     while not player.isPlaying():
+        #         xbmc.sleep(2000)
+        #     player.setSubtitles(_subtitles_path_)
 
 
     def playPlayable(playable, skipAutoQuality=False, forceQuality=None):
