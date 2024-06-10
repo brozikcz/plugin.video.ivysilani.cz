@@ -449,7 +449,7 @@ def genres():
 
 
 # výpis písmen abecedy
-_alphabet = None
+_alphabet = [Letter("#","!")] + list(map(lambda x: Letter(x,x)  ,[chr(i) for i in range(ord('A'),ord('Z')+1)] ))
 
 
 def alphabet():
